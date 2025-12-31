@@ -96,23 +96,44 @@ footer{
 © 2025 HindiHub4u | All Rights Reserved
 </footer>
 <script>
+let allMovies = [];
+
 fetch('movies.csv')
 .then(res => res.text())
 .then(data => {
     const rows = data.split('\n').slice(1);
+    allMovies = rows.map(row => {
+        const c = row.split(',');
+        return {
+            title: c[0],
+            year: c[1],
+            poster: c[2],
+            download: c[3]
+        };
+    });
+    showMovies(allMovies);
+});
+
+function showMovies(list){
     let html = '';
-    rows.forEach(row => {
-        const cols = row.split(',');
-        if(cols.length >= 4){
-            html += `
-            <div class="movie">
-                <img src="${cols[2].trim()}">
-                <h3>${cols[0]} (${cols[1]})</h3>
-                <a href="${cols[3].trim()}">Download</a>
-            </div>`;
-        }
+    list.forEach(m => {
+        html += `
+        <div class="movie">
+            <img src="${m.poster}">
+            <h3>${m.title} (${m.year})</h3>
+            <a href="${m.download}">Download</a>
+        </div>`;
     });
     document.querySelector('.movies').innerHTML = html;
+}
+
+document.querySelector('.search input').addEventListener('keyup', e => {
+    const val = e.target.value.toLowerCase();
+    const filtered = allMovies.filter(m =>
+        m.title.toLowerCase().includes(val) ||
+        m.year.includes(val)
+    );
+    showMovies(filtered);
 });
 </script>
 </body>
