@@ -245,7 +245,7 @@ function init() {
       const headers = lines[0].split(",");
 
       movies = lines.slice(1).map(line => {
-        const data = line.split(",");
+        const data = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
         let obj = {};
         headers.forEach((h, i) => {
           obj[h.trim()] = data[i]?.trim() || "";
