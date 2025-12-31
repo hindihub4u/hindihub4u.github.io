@@ -2,373 +2,166 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>HindiHub4u - Movies Download</title>
+<title>hindihub4u – Free & Legal Movies</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-    margin:0;
-    font-family: Arial, sans-serif;
-    background:#0f172a;
-    color:white;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0f172a;color:#fff}
+
 header{
-    background:#020617;
-    padding:15px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
-    color:#22c55e;
+  background:#020617;
+  padding:12px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
+.logo{color:#22c55e;font-size:22px;font-weight:bold}
 .search{
-    padding:15px;
-    text-align:center;
+  padding:8px 10px;
+  border-radius:5px;
+  border:none;
+  outline:none;
+  width:160px;
 }
-.search input{
-    width:90%;
-    max-width:400px;
-    padding:10px;
-    border-radius:5px;
-    border:none;
-    outline:none;
+
+nav{
+  background:#020617;
+  text-align:center;
+  padding:10px;
 }
-.movies{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:15px;
-    padding:15px;
+nav a{
+  color:#bbb;
+  margin:0 8px;
+  text-decoration:none;
+  font-size:14px;
 }
-.movie{
-    background:#020617;
-    border-radius:8px;
-    overflow:hidden;
-    text-align:center;
+nav a:hover{color:#22c55e}
+
+.container{padding:15px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:15px;
 }
-.movie img{
-    width:100%;
-    height:260px;
-    object-fit:cover;
+
+.card{
+  background:#020617;
+  border-radius:8px;
+  overflow:hidden;
+  text-align:center;
+  position:relative;
 }
-.movie h3{
-    font-size:16px;
-    margin:10px 5px;
+.card img{
+  width:100%;
+  height:230px;
+  object-fit:cover;
 }
-.movie a{
-    display:block;
-    background:#22c55e;
-    color:black;
-    padding:8px;
-    text-decoration:none;
-    font-weight:bold;
+.badge{
+  position:absolute;
+  top:6px;
+  left:6px;
+  background:red;
+  padding:2px 6px;
+  font-size:11px;
+  border-radius:3px;
 }
+.card h3{
+  font-size:14px;
+  margin:8px 5px;
+}
+.download{
+  display:block;
+  background:#22c55e;
+  color:#000;
+  padding:7px;
+  text-decoration:none;
+  font-weight:bold;
+}
+.legal{
+  font-size:11px;
+  color:#aaa;
+  margin:5px;
+}
+
 footer{
-    text-align:center;
-    padding:10px;
-    background:#020617;
-    font-size:14px;
+  background:#020617;
+  text-align:center;
+  padding:10px;
+  font-size:12px;
+  color:#aaa;
 }
 </style>
 </head>
 
 <body>
 
-<header>HindiHub4u</header>
+<header>
+  <div class="logo">hindihub4u</div>
+  <input id="searchInput" class="search" placeholder="Search movies...">
+</header>
 
-<div class="search">
-    <input type="text" placeholder="Search movies...">
-</div>
+<nav>
+  <a href="#" onclick="filterCategory('all')">Home</a>
+  <a href="#" onclick="filterCategory('bollywood')">Bollywood</a>
+  <a href="#" onclick="filterCategory('hollywood')">Hollywood</a>
+  <a href="#" onclick="filterCategory('south')">South</a>
+</nav>
 
-<div class="movies">
-    <div class="movie">
-        <img src="https://via.placeholder.com/300x450">
-        <h3>Sample Movie 2024</h3>
-        <a href="#">Download</a>
-    </div>
-
-    <div class="movie">
-        <img src="https://via.placeholder.com/300x450">
-        <h3>Sample Movie 2</h3>
-        <a href="#">Download</a>
-    </div>
+<div class="container">
+  <div class="grid" id="moviesGrid"></div>
 </div>
 
 <footer>
-© 2025 HindiHub4u | All Rights Reserved
+© 2025 hindihub4u  
+<div class="legal">Only free / licensed movies are listed.</div>
 </footer>
-<script>
-let allMovies = [];
 
-fetch('movies.csv')
+<script>
+/* 🔴 REPLACE THIS WITH YOUR RAW CSV LINK */
+const sheetCSV = "movies.csv";
+
+let movies = [];
+
+fetch(sheetCSV)
 .then(res => res.text())
-.then(data => {
-    const rows = data.split('\n').slice(1);
-    allMovies = rows.map(row => {
-        const c = row.split(',');
-        return {
-            title: c[0],
-            year: c[1],
-            poster: c[2],
-            download: c[3]
-        };
-    });
-    showMovies(allMovies);
+.then(csv => {
+  const lines = csv.trim().split("\n");
+  const headers = lines[0].split(",");
+  movies = lines.slice(1).map(line => {
+    const data = line.split(",");
+    let obj = {};
+    headers.forEach((h,i)=>obj[h.trim()]=data[i]?.trim()||"");
+    return obj;
+  });
+  renderMovies(movies);
 });
 
-function showMovies(list){
-    let html = '';
-    list.forEach(m => {
-        html += `
-        <div class="movie">
-            <img src="${m.poster}">
-            <h3>${m.title} (${m.year})</h3>
-            <a href="${m.download}">Download</a>
-        </div>`;
-    });
-    document.querySelector('.movies').innerHTML = html;
+function renderMovies(list){
+  const grid = document.getElementById("moviesGrid");
+  grid.innerHTML="";
+  list.forEach(m=>{
+    grid.innerHTML += `
+    <div class="card">
+      <span class="badge">${m.quality || "HD"}</span>
+      <img src="${m.poster}">
+      <h3>${m.title} (${m.year})</h3>
+      <a class="download" href="${m.download}" target="_blank">⬇ Download</a>
+      <div class="legal">${m.license || ""}</div>
+    </div>`;
+  });
 }
 
-document.querySelector('.search input').addEventListener('keyup', e => {
-    const val = e.target.value.toLowerCase();
-    const filtered = allMovies.filter(m =>
-        m.title.toLowerCase().includes(val) ||
-        m.year.includes(val)
-    );
-    showMovies(filtered);
+function filterCategory(cat){
+  if(cat==="all") renderMovies(movies);
+  else renderMovies(movies.filter(m=>m.category===cat));
+}
+
+document.getElementById("searchInput").addEventListener("input",e=>{
+  const q=e.target.value.toLowerCase();
+  renderMovies(movies.filter(m=>m.title.toLowerCase().includes(q)));
 });
 </script>
-</body>
-</html>
-
-On Wed, 31 Dec, 2025, 4:41 pm Yashraj Patel, <yashraj.patel.in@gmail.com> wrote:
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>hindihub4u – Free & Legal Movies</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ===== CSS (INLINE) ===== -->
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #0f0f0f;
-      color: #fff;
-    }
-
-    header {
-      background: #1a1a1a;
-      padding: 12px 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      color: #ffcc00;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .search {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: none;
-      outline: none;
-    }
-
-    nav {
-      background: #111;
-      padding: 10px;
-      text-align: center;
-    }
-
-    nav a {
-      color: #ccc;
-      margin: 0 8px;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    nav a:hover {
-      color: #ffcc00;
-    }
-
-    .container {
-      padding: 15px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 15px;
-    }
-
-    .card {
-      background: #1c1c1c;
-      border-radius: 6px;
-      padding: 8px;
-      position: relative;
-      text-align: center;
-    }
-
-    .card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-
-    .badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: red;
-      padding: 2px 6px;
-      font-size: 12px;
-      border-radius: 3px;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      margin: 8px 0;
-    }
-
-    .download {
-      display: block;
-      background: #ffcc00;
-      color: #000;
-      text-decoration: none;
-      padding: 6px;
-      border-radius: 4px;
-      font-size: 13px;
-      margin-top: 5px;
-    }
-
-    .download:hover {
-      background: #e6b800;
-    }
-
-    footer {
-      background: #111;
-      text-align: center;
-      padding: 10px;
-      font-size: 12px;
-      margin-top: 20px;
-      color: #aaa;
-    }
-
-    .legal {
-      font-size: 11px;
-      color: #aaa;
-      margin-top: 4px;
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- ===== HEADER ===== -->
-  <header>
-    <div class="logo">hindihub4u</div>
-    <input type="text" id="searchInput" class="search" placeholder="Search movies...">
-  </header>
-
-  <!-- ===== MENU ===== -->
-  <nav>
-    <a href="#" onclick="filterCategory('all')">Home</a>
-    <a href="#" onclick="filterCategory('bollywood')">Bollywood</a>
-    <a href="#" onclick="filterCategory('hollywood')">Hollywood</a>
-    <a href="#" onclick="filterCategory('south')">South</a>
-    <a href="#" onclick="filterCategory('classics')">Classics</a>
-  </nav>
-
-  <!-- ===== MOVIES ===== -->
-  <div class="container">
-    <div class="grid" id="moviesGrid">
-      <!-- Movies load here -->
-    </div>
-  </div>
-
-  <!-- ===== FOOTER ===== -->
-  <footer>
-    © 2025 hindihub4u  
-    <div class="legal">
-      Only public-domain / free licensed movies are listed.
-    </div>
-  </footer>
-
-  <!-- ===== JAVASCRIPT ===== -->
-  <script>
-    const sheetCSV =
-      "PASTE_YOUR_PUBLISHED_CSV_LINK_HERE";
-
-    let movies = [];
-
-    async function loadMovies() {
-      try {
-        const res = await fetch(sheetCSV);
-        const text = await res.text();
-        movies = csvToJson(text);
-        renderMovies(movies);
-      } catch (e) {
-        console.error("CSV load error", e);
-      }
-    }
-
-    function csvToJson(csv) {
-      const lines = csv.trim().split("\n");
-      const headers = lines[0].split(",");
-      return lines.slice(1).map(line => {
-        const data = line.split(",");
-        let obj = {};
-        headers.forEach((h, i) => {
-          obj[h.trim()] = data[i] ? data[i].trim() : "";
-        });
-        return obj;
-      });
-    }
-
-    function renderMovies(list) {
-      const grid = document.getElementById("moviesGrid");
-      grid.innerHTML = "";
-      list.forEach(movie => {
-        grid.innerHTML += `
-          <div class="card">
-            <span class="badge">${movie.quality || "HD"}</span>
-            <img src="${movie.poster_url}" alt="${movie.title}">
-            <h3>${movie.title} (${movie.year})</h3>
-            <a class="download" href="${movie.download_url}" target="_blank">
-              ⬇ Download
-            </a>
-            <div class="legal">${movie.license}</div>
-          </div>
-        `;
-      });
-    }
-
-    function filterCategory(cat) {
-      if (cat === "all") {
-        renderMovies(movies);
-      } else {
-        renderMovies(movies.filter(m => m.category === cat));
-      }
-    }
-
-    document.getElementById("searchInput").addEventListener("input", e => {
-      const q = e.target.value.toLowerCase();
-      renderMovies(
-        movies.filter(m => m.title.toLowerCase().includes(q))
-      );
-    });
-
-    loadMovies();
-  </script>
 
 </body>
 </html>
