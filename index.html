@@ -95,7 +95,26 @@ footer{
 <footer>
 © 2025 HindiHub4u | All Rights Reserved
 </footer>
-
+<script>
+fetch('movies.csv')
+.then(res => res.text())
+.then(data => {
+    const rows = data.split('\n').slice(1);
+    let html = '';
+    rows.forEach(row => {
+        const cols = row.split(',');
+        if(cols.length >= 4){
+            html += `
+            <div class="movie">
+                <img src="${cols[2].trim()}">
+                <h3>${cols[0]} (${cols[1]})</h3>
+                <a href="${cols[3].trim()}">Download</a>
+            </div>`;
+        }
+    });
+    document.querySelector('.movies').innerHTML = html;
+});
+</script>
 </body>
 </html>
 
