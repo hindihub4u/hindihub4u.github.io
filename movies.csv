@@ -1,4 +1,3 @@
-title,year,poster,download
-Sample Movie 2024,2024,https://via.placeholder.com/300x450,#
-Action Movie 2023,2023,https://via.placeholder.com/300x450,#
-Hindi Movie 2022,2022,https://via.placeholder.com/300x450,#
+title,year,poster,download,category,quality,license
+Sample Movie,2024,https://via.placeholder.com/300x450,#,bollywood,HD,Free
+Action Film,2023,https://via.placeholder.com/300x450,#,south,HD,Free
