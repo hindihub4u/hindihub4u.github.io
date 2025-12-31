@@ -340,14 +340,8 @@ function renderMovies() {
         <img src="${m.poster}" alt="${m.title}" class="w-full h-full object-cover">
         <div class="absolute top-2 right-2">${getQualityBadge(m.quality)}</div>
         <div class="poster-overlay absolute inset-0 flex items-end p-3 opacity-0 hover:opacity-100 bg-black/70 transition">
-          <button onclick="openModal(
-            '${m.title}',
-            '${m.year}',
-            '${m.download_480p}',
-            '${m.download_720p}',
-            '${m.download_1080p}',
-            '${m.download_4k}'
-          )" class="w-full bg-red-500 text-white py-2 rounded-lg font-semibold">
+          <button onclick="openModal(${i})"
+            class="w-full bg-red-500 text-white py-2 rounded-lg font-semibold">
             Download
           </button>
         </div>
@@ -362,27 +356,35 @@ function renderMovies() {
 
 /* ---------- MODAL ---------- */
 
-function openModal(title, year, p480, p720, p1080, p4k) {
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-year').textContent = year;
+function openModal(index) {
+  const m = movies[index];
+
+  document.getElementById('modal-title').textContent = m.title;
+  document.getElementById('modal-year').textContent = m.year;
 
   const links = [
-    ['480p', p480],
-    ['720p', p720],
-    ['1080p', p1080],
-    ['4K', p4k]
-  ].filter(l => l[1]);
+    { q: '480p', link: m.download_480p },
+    { q: '720p', link: m.download_720p },
+    { q: '1080p', link: m.download_1080p },
+    { q: '4K', link: m.download_4k }
+  ].filter(l =>
+    l.link &&
+    l.link.trim() !== "" &&
+    l.link !== "#"
+  );
 
   document.getElementById('modal-links').innerHTML = links.map(l => `
-    <a href="${l[1]}" target="_blank" rel="nofollow noopener"
+    <a href="${l.link}"
+       target="_blank"
+       rel="nofollow noopener noreferrer"
        class="block bg-red-500 text-white p-3 rounded-lg mb-2 text-center font-semibold">
-      Download ${l[0]}
+      Download ${l.q}
     </a>
   `).join('');
 
   document.getElementById('download-modal').classList.remove('hidden');
 }
-
+   
 function closeModal() {
   document.getElementById('download-modal').classList.add('hidden');
 }
