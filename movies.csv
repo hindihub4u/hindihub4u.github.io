@@ -1,4 +1,6 @@
-title,year,poster,category,quality,download_480p,download_720p,download_1080p,download_4k
-Sample Movie,2024,https://via.placeholder.com/300x450,bollywood,HD,#,#,#,
-Action Film,2023,https://picsum.photos/300/450,south,Full HD,#,#,#,
-Avatar Movie,2025,https://drive.google.com/thumbnail?id=1JWCkKoOsHM0v2mZ40cnzQgJEcIg9Iu65&sz=w1000,hollywood,4K,https://bollydrive.baby/new/file/44836074,https://bollydrive.baby/new/file/72536098,https://bollydrive.baby/new/file/78973122,#
+ImdbID,Category,Quality
+tt12805754,Bollywood,4K
+tt15398776,Hollywood,HD
+tt14948432,WebSeries,1080p
+tt26655108,Bollywood,HD
+tt0111161,Hollywood,4K
