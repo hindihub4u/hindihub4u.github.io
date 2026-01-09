@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { Search, Film, Menu, X } from "lucide-react";
 import { MovieCard } from "./components/MovieCard";
 import { DownloadModal } from "./components/DownloadModal";
-import { moviesData } from "./data/moviesData";
 
 const OMDB_API_KEY = 'c24f4e30';
 
@@ -16,10 +15,12 @@ interface Movie {
   poster: string;
   category: Category;
   quality: string;
-  download_480p?: string;
-  download_720p?: string;
-  download_1080p?: string;
-  download_4k?: string;
+  downloads?: {
+  "480p"?: string;
+  "720p"?: string;
+  "1080p"?: string;
+  "4k"?: string;
+  };
   // OMDB Additional Details
   rated?: string;
   released?: string;
@@ -88,82 +89,63 @@ export default function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
-    // Load movies from imported data
-    const loadMovies = async () => {
-      console.log('🎬 Loading movies from data file...');
-      console.log('Total movie entries:', moviesData.length);
-      
-      try {
-        // Fetch OMDB data for each movie
-        const moviesWithOMDB = await Promise.all(
-          moviesData.map(async (csvMovie, index) => {
-            const imdbId = csvMovie.imdb_id;
-            
-            try {
-              // Fetch from OMDB API using IMDB ID
-              const omdbResponse = await fetch(
-                `https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`
-              );
-              const omdbData = await omdbResponse.json();
-              
-              if (omdbData.Response === 'True') {
-                return {
-                  id: index + 1,
-                  imdbID: imdbId,
-                  title: omdbData.Title,
-                  year: omdbData.Year,
-                  poster: omdbData.Poster !== 'N/A' ? omdbData.Poster : '',
-                  category: csvMovie.category as Category,
-                  quality: csvMovie.quality,
-                  download_480p: csvMovie.download_480p,
-                  download_720p: csvMovie.download_720p,
-                  download_1080p: csvMovie.download_1080p,
-                  download_4k: csvMovie.download_4k,
-                  rated: omdbData.Rated,
-                  released: omdbData.Released,
-                  runtime: omdbData.Runtime,
-                  genre: omdbData.Genre,
-                  director: omdbData.Director,
-                  writer: omdbData.Writer,
-                  actors: omdbData.Actors,
-                  plot: omdbData.Plot,
-                  language: omdbData.Language,
-                  country: omdbData.Country,
-                  awards: omdbData.Awards,
-                  imdbRating: omdbData.imdbRating,
-                  imdbVotes: omdbData.imdbVotes,
-                  metascore: omdbData.Metascore,
-                  type: omdbData.Type,
-                  ratings: omdbData.Ratings,
-                  totalSeasons: omdbData.totalSeasons,
-                  boxOffice: omdbData.BoxOffice,
-                  production: omdbData.Production
-                } as Movie;
-              } else {
-                console.warn(`OMDB fetch failed for ${imdbId}: ${omdbData.Error}`);
-                return null;
-              }
-            } catch (error) {
-              console.error(`Error fetching OMDB data for ${imdbId}:`, error);
-              return null;
-            }
-          })
-        );
-        
-        // Filter out null values
-        const validMovies = moviesWithOMDB.filter(m => m !== null) as Movie[];
-        
-        console.log('✅ Successfully loaded', validMovies.length, 'movies with OMDB data');
-        setMovies(validMovies);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error loading movies:', error);
-        setIsLoading(false);
+  const loadMovies = async () => {
+    try {
+      console.log("📥 Loading movies.json...");
+
+      const res = await fetch("./movies.json");
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("movies.json is not an array");
       }
-    };
-    
-    loadMovies();
-  }, []);
+
+      const moviesWithOMDB = await Promise.all(
+        data.map(async (csvMovie: any, index: number) => {
+          try {
+            const omdbRes = await fetch(
+              `https://www.omdbapi.com/?i=${csvMovie.imdb_id}&apikey=${OMDB_API_KEY}`
+            );
+            const omdbData = await omdbRes.json();
+
+            if (omdbData.Response !== "True") return null;
+
+            return {
+              id: index + 1,
+              imdbID: csvMovie.imdb_id,
+              title: omdbData.Title,
+              year: omdbData.Year,
+              poster: omdbData.Poster !== "N/A" ? omdbData.Poster : "",
+              category: csvMovie.category,
+              quality: csvMovie.quality,
+              downloads: csvMovie.downloads || {},
+              genre: omdbData.Genre,
+              runtime: omdbData.Runtime,
+              plot: omdbData.Plot,
+              director: omdbData.Director,
+              actors: omdbData.Actors,
+              imdbRating: omdbData.imdbRating,
+              type: omdbData.Type,
+            };
+          } catch (err) {
+            console.error("OMDB error:", err);
+            return null;
+          }
+        })
+      );
+
+      setMovies(moviesWithOMDB.filter(Boolean));
+    } catch (err) {
+      console.error("❌ Failed loading movies.json", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  loadMovies();
+}, []);
+
+
 
   const filteredMovies = useMemo(() => {
     return movies.filter(movie => {
@@ -176,10 +158,18 @@ export default function App() {
 
   const handleDownloadClick = (movie: Movie) => {
     const links = [];
-    if (movie.download_480p) links.push({ quality: '480p', url: movie.download_480p });
-    if (movie.download_720p) links.push({ quality: '720p', url: movie.download_720p });
-    if (movie.download_1080p) links.push({ quality: '1080p', url: movie.download_1080p });
-    if (movie.download_4k) links.push({ quality: '4K', url: movie.download_4k });
+    
+	if (movie.downloads?.["480p"])
+  links.push({ quality: "480p", url: movie.downloads["480p"] });
+
+	if (movie.downloads?.["720p"])
+  links.push({ quality: "720p", url: movie.downloads["720p"] });
+
+	if (movie.downloads?.["1080p"])
+  links.push({ quality: "1080p", url: movie.downloads["1080p"] });
+
+	if (movie.downloads?.["4k"])
+  links.push({ quality: "4K", url: movie.downloads["4k"] });
 
     setSelectedMovie({
       title: movie.title,
@@ -222,17 +212,22 @@ export default function App() {
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             {/* Logo */}
             <div className="flex items-center justify-between">
-              <a href="#" className="flex items-center gap-2 group">
-                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                  <Film className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-['Bebas_Neue',sans-serif] tracking-wider bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
-                    HindiHub4u
-                  </h1>
-                  <p className="text-[10px] text-gray-500 -mt-1">Your Ultimate Movie Destination</p>
-                </div>
-              </a>
+				<a href="/" className="flex items-center gap-2">
+				  <img
+					src="/logo.png"
+					alt="HindiHub4u Logo"
+					className="w-10 h-10 object-contain"
+				  />
+
+				  <div>
+					<h1 className="text-2xl font-['Bebas_Neue',sans-serif] tracking-wider bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+					  HindiHub4u
+					</h1>
+					<p className="text-[10px] text-gray-500 -mt-1">
+					  Your Ultimate Movie Destination
+					</p>
+				  </div>
+				</a>
               
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
