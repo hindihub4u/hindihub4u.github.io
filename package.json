@@ -10,7 +10,10 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
+<<<<<<< HEAD
     "@jridgewell/sourcemap-codec": "^1.5.5",
+=======
+>>>>>>> ef0d593a0aa5c84fc7a4e090c973a3d883b28840
     "@mui/icons-material": "7.3.5",
     "@mui/material": "7.3.5",
     "@popperjs/core": "2.11.8",
@@ -37,8 +40,13 @@
     "@radix-ui/react-slot": "1.1.2",
     "@radix-ui/react-switch": "1.1.3",
     "@radix-ui/react-tabs": "1.1.3",
+<<<<<<< HEAD
     "@radix-ui/react-toggle": "1.1.2",
     "@radix-ui/react-toggle-group": "1.1.2",
+=======
+    "@radix-ui/react-toggle-group": "1.1.2",
+    "@radix-ui/react-toggle": "1.1.2",
+>>>>>>> ef0d593a0aa5c84fc7a4e090c973a3d883b28840
     "@radix-ui/react-tooltip": "1.1.8",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -86,4 +94,8 @@
       "vite": "6.3.5"
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ef0d593a0aa5c84fc7a4e090c973a3d883b28840
